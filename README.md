@@ -43,7 +43,7 @@ Unlike boards that require native USB HID hardware, rUNOdeck communicates over a
 - **Microcontroller**: Arduino Uno R3 or Arduino Nano (ATmega328P)
 - **Display**: 16x2 Character LCD (HD44780) with PCF8574 I2C backpack (`0x27` address)
 - **Keypad**: 4x4 16-Button Matrix Module
-- **Joystick**: Dual-axis KY-023 Analog Joystick Module with push-button switch
+- **Joystick**: Dual-axis HW-504 Analog Joystick Module with push-button switch
 
 ### Wiring Pinout
 
