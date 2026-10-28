@@ -21,11 +21,11 @@ Unlike boards that require native USB HID hardware, rUNOdeck communicates over a
 ## Features
 
 - **16-Key Tactile Matrix + `*` Chord Layer**: Trigger direct hotkeys, URLs, media transport controls, text snippets, audio device switches, or application launches. Pressing `*` enters a secondary chord menu (`* + 0` through `* + D`), and any custom label configured in the GUI is dynamically displayed on the physical 16x2 LCD when triggered.
-- **3 Live Analog Joystick Modes (Cycled via Stick Push-Button `SW`)**:
+- **3 Live Analog Joystick Modes (Cycled via Stick Push-Button `SW` or `* + #` Chord)**:
   - **Mode 1 (`Shortcuts`)**: Push and hold Up/Down for variable-speed continuous actions (`140ms` down to `45ms` repeat interval based on stick tilt), or flick Left/Right for instant shortcuts. All 4 directions (`UP`, `DOWN`, `LEFT`, `RIGHT`) are customizable in the GUI.
   - **Mode 2 (`Mouse`)**: 62Hz EMA low-pass filtered vector streaming paired with a Win32 sub-pixel accumulator and quadratic acceleration curve for jitter-free cursor precision.
   - **Mode 3 (`Scroll`)**: 40Hz proportional wheel-delta scrolling for smooth document and webpage navigation.
-  - **Hardware Center Calibration & Live Telemetry**: Streams normalized deflection vectors (`TELEM: x,y`) in all modes with one-click hardware zero-point calibration from the desktop GUI, plus bi-directional `SW` switch sensing (`GND` and `+5V` polarity auto-detection).
+  - **Hardware Center Calibration & Live Telemetry**: Streams normalized deflection vectors (`TELEM: x,y`) in all modes with one-click hardware zero-point calibration from the desktop GUI.
 - **Silent Windows CoreAudio Switching**: Includes a standalone C# COM interop utility (`SetAudioDevice.cs`) targeting the Windows `IPolicyConfig` vtable to switch Console, Multimedia, and Communications audio endpoints (`*` + `4` for Speakers, `*` + `5` for Headphones, `*` + `C` for Earphone Jack) silently in the background.
 - **Custom CGRAM LCD HUD, Idle Wave Animation & Stealth Mode**: Features a custom infinity badge and a non-blocking 16-column equalizer wave animation after 5 seconds of inactivity, plus a hardware/software chord (`*` + `0`) to turn the LCD backlight off or on.
 - **Frameless Desktop Companion GUI & System Tray**:

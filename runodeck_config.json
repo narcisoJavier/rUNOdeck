@@ -6,9 +6,9 @@
       "target": "volumemute"
     },
     "1": {
-      "name": "Mute Mic",
+      "name": "Close Window",
       "type": "hotkey",
-      "target": "ctrl+shift+m"
+      "target": "alt + f4"
     },
     "2": {
       "name": "Screenshot",
@@ -21,14 +21,14 @@
       "target": "ctrl+c"
     },
     "4": {
-      "name": "Paste",
+      "name": "Netflix",
       "type": "hotkey",
-      "target": "ctrl+v"
+      "target": "https://netflix.com"
     },
     "5": {
-      "name": "Spotify",
+      "name": "Facebook",
       "type": "app",
-      "target": "spotify:"
+      "target": "https://facebook.com"
     },
     "6": {
       "name": "YouTube",
@@ -36,9 +36,9 @@
       "target": "https://youtube.com"
     },
     "7": {
-      "name": "Prev Desktop",
-      "type": "hotkey",
-      "target": "ctrl+win+left"
+      "name": "Antigravity",
+      "type": "app",
+      "target": "\"C:\\Users\\UZNIR\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Antigravity.lnk\""
     },
     "8": {
       "name": "Next Desktop",
@@ -71,16 +71,21 @@
       "target": "win+d"
     },
     "#": {
-      "name": "Play / Pause",
-      "type": "media",
-      "target": "playpause"
+      "name": "Mute Mic",
+      "type": "hotkey",
+      "target": "ctrl+shift+m"
     }
   },
   "combos": {
+    "0": {
+      "name": "Toggle LCD / LEDs",
+      "type": "device",
+      "target": "toggle_led"
+    },
     "1": {
-      "name": "Discord",
+      "name": "rUNOdeck",
       "type": "app",
-      "target": "discord:"
+      "target": "\"D:\\A-PC FILES\\Desktop\\rUNOdeck.lnk\""
     },
     "2": {
       "name": "VS Code",
@@ -107,11 +112,6 @@
       "type": "url",
       "target": "https://github.com"
     },
-    "C": {
-      "name": "Earphone Jack",
-      "type": "audio",
-      "target": "Earphone"
-    },
     "7": {
       "name": "ChatGPT",
       "type": "url",
@@ -127,10 +127,10 @@
       "type": "app",
       "target": "%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\OpenCode.lnk"
     },
-    "0": {
-      "name": "Toggle LCD / LEDs",
-      "type": "device",
-      "target": "toggle_led"
+    "C": {
+      "name": "Earphone Jack",
+      "type": "audio",
+      "target": "Earphone"
     },
     "#": {
       "name": "Cycle Stick Mode",
