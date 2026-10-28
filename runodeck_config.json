@@ -131,6 +131,11 @@
       "name": "Toggle LCD / LEDs",
       "type": "device",
       "target": "toggle_led"
+    },
+    "#": {
+      "name": "Cycle Stick Mode",
+      "type": "device",
+      "target": "cycle_mode"
     }
   },
   "joystick_bindings": {

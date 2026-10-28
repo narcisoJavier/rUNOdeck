@@ -187,6 +187,8 @@ def execute_generic_action(action_type, target, label=None):
         elif action_type == "device":
             if target.lower() == "toggle_led":
                 send_serial_command("CMD: TOGGLE_LED")
+            elif target.lower() == "cycle_mode":
+                send_serial_command("CMD: CYCLE_MODE")
         elif action_type == "text":
             pyautogui.write(target)
     except Exception as e:

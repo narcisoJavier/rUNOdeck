@@ -32,9 +32,6 @@ Keypad keypad = Keypad(
 const int JOY_X  = A0;
 const int JOY_Y  = A1;
 const int JOY_SW = A2;
-const int SW_PINS[6] = {A2, A3, 10, 11, 12, 13};
-bool swBaselinePullup[6] = {HIGH, HIGH, HIGH, HIGH, HIGH, HIGH};
-int swBaselineFloat[2] = {0, 0};
 
 int centerX = 512;
 int centerY = 512;
@@ -253,128 +250,21 @@ void checkSerialCommands() {
       setMode(MODE_MOUSE);
     } else if (strcmp(buf, "CMD: MODE_SCROLL") == 0) {
       setMode(MODE_SCROLL);
+    } else if (strcmp(buf, "CMD: CYCLE_MODE") == 0) {
+      cycleStickMode();
     } else if (strcmp(buf, "CMD: DIAG") == 0) {
-      Serial.print("DIAG:");
-      for (int i = 0; i < 2; i++) {
-        int p = SW_PINS[i];
-        pinMode(p, INPUT_PULLUP);
-        delayMicroseconds(30);
-        int pu = analogRead(p);
-        pinMode(p, OUTPUT);
-        digitalWrite(p, LOW);
-        analogRead(p);
-        pinMode(p, INPUT);
-        delayMicroseconds(25);
-        int pd = analogRead(p);
-        pinMode(p, INPUT_PULLUP);
-        Serial.print(" A"); Serial.print(i + 2);
-        Serial.print("="); Serial.print(pu);
-        Serial.print("/"); Serial.print(pd);
-      }
-      for (int i = 2; i < 6; i++) {
-        int p = SW_PINS[i];
-        pinMode(p, INPUT_PULLUP);
-        delayMicroseconds(20);
-        int pu = digitalRead(p);
-        pinMode(p, OUTPUT);
-        digitalWrite(p, LOW);
-        delayMicroseconds(3);
-        pinMode(p, INPUT);
-        delayMicroseconds(8);
-        int pd = digitalRead(p);
-        pinMode(p, INPUT_PULLUP);
-        Serial.print(" D"); Serial.print(p);
-        Serial.print("="); Serial.print(pu);
-        Serial.print("/"); Serial.print(pd);
-      }
-      Serial.println();
+      Serial.print("DIAG: A2_DIG=");
+      Serial.print(digitalRead(JOY_SW));
+      Serial.print(" A2_ANA=");
+      Serial.println(analogRead(JOY_SW));
     }
   }
-}
-
-int swBasePuAnalog[2] = {1023, 1023};
-int swBasePdAnalog[2] = {0, 0};
-bool swBaselinePd[6] = {LOW, LOW, LOW, LOW, LOW, LOW};
-
-bool probeAnalogSwitchPin(int pin, int idx) {
-  pinMode(pin, INPUT_PULLUP);
-  delayMicroseconds(30);
-  int pu = analogRead(pin);
-
-  pinMode(pin, OUTPUT);
-  digitalWrite(pin, LOW);
-  analogRead(pin);
-  pinMode(pin, INPUT);
-  delayMicroseconds(25);
-  int pd = analogRead(pin);
-
-  pinMode(pin, INPUT_PULLUP);
-  return (abs(pu - swBasePuAnalog[idx]) > 140) || (abs(pd - swBasePdAnalog[idx]) > 180);
-}
-
-bool probePinPressed(int pin, bool basePu, bool basePd) {
-  pinMode(pin, INPUT_PULLUP);
-  delayMicroseconds(20);
-  bool pu = digitalRead(pin);
-
-  pinMode(pin, OUTPUT);
-  digitalWrite(pin, LOW);
-  delayMicroseconds(3);
-  pinMode(pin, INPUT);
-  delayMicroseconds(8);
-  bool pd = digitalRead(pin);
-
-  pinMode(pin, INPUT_PULLUP);
-  return (pu != basePu) || (pd != basePd);
-}
-
-bool readStickButtonPressed() {
-  for (int i = 0; i < 2; i++) {
-    if (probeAnalogSwitchPin(SW_PINS[i], i)) {
-      return true;
-    }
-  }
-  for (int i = 2; i < 6; i++) {
-    if (probePinPressed(SW_PINS[i], swBaselinePullup[i], swBaselinePd[i])) {
-      return true;
-    }
-  }
-  return false;
 }
 
 void setup() {
   Serial.begin(115200);
   Serial.setTimeout(8);
-  for (int i = 0; i < 2; i++) {
-    int p = SW_PINS[i];
-    pinMode(p, INPUT_PULLUP);
-    delayMicroseconds(50);
-    swBasePuAnalog[i] = analogRead(p);
-
-    pinMode(p, OUTPUT);
-    digitalWrite(p, LOW);
-    analogRead(p);
-    pinMode(p, INPUT);
-    delayMicroseconds(25);
-    swBasePdAnalog[i] = analogRead(p);
-
-    pinMode(p, INPUT_PULLUP);
-  }
-  for (int i = 2; i < 6; i++) {
-    int p = SW_PINS[i];
-    pinMode(p, INPUT_PULLUP);
-    delayMicroseconds(50);
-    swBaselinePullup[i] = digitalRead(p);
-
-    pinMode(p, OUTPUT);
-    digitalWrite(p, LOW);
-    delayMicroseconds(3);
-    pinMode(p, INPUT);
-    delayMicroseconds(8);
-    swBaselinePd[i] = digitalRead(p);
-
-    pinMode(p, INPUT_PULLUP);
-  }
+  pinMode(JOY_SW, INPUT_PULLUP);
 
   lcd.init();
   lcd.backlight();
@@ -419,6 +309,8 @@ void loop() {
       selectingMode = false;
       if (key == '0') {
         setLedState(!ledEnabled);
+      } else if (key == '#') {
+        cycleStickMode();
       } else {
         Serial.print("COMBO: ");
         Serial.println(key);
@@ -567,9 +459,10 @@ void loop() {
     }
   }
 
-  // Pressing the joystick button (JOY_SW) cycles the stick mode: MEDIA -> MOUSE -> SCROLL
-  bool currentBtnState = readStickButtonPressed() ? LOW : HIGH;
-  if (currentBtnState == LOW && lastBtnState == HIGH && (millis() - lastBtnDebounce > 220)) {
+  // Pressing the HW-504 joystick button (JOY_SW on A2, active-LOW with INPUT_PULLUP)
+  // cycles the stick mode: MEDIA -> MOUSE -> SCROLL
+  bool currentBtnState = digitalRead(JOY_SW);
+  if (currentBtnState == LOW && lastBtnState == HIGH && (millis() - lastBtnDebounce > 180)) {
     lastBtnDebounce = millis();
     cycleStickMode();
   }
