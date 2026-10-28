@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>rUNOdeck</title>
+  <script>
+    (function() {
+      try {
+        var saved = localStorage.getItem('color-scheme');
+        var scheme = saved || 'light';
+        document.querySelector('meta[name="color-scheme"]').content = scheme;
+      } catch (e) {}
+    })();
+  </script>
+  <style>
+    :root {
+      --sidebar-bg: #13161C;
+      --sidebar-surface: #1C2029;
+      --sidebar-active: #262B36;
+      --sidebar-border: #242935;
+      --sidebar-text: #F3F4F6;
+      --sidebar-muted: #8E95A5;
+
+      --bg-workspace: light-dark(#EAE9E4, #111318);
+      --bg-panel: light-dark(#F4F3EE, #181B22);
+      --bg-inspector: light-dark(#FFFFFF, #1C2029);
+      --bg-card: light-dark(#FFFFFF, #222631);
+      --bg-card-hover: light-dark(#FAF9F5, #2A2F3D);
+      --bg-active-card: #16181D;
+      --bg-input: light-dark(#F9F9F7, #15181F);
+
+      --text-primary: light-dark(#121316, #F3F4F6);
+      --text-secondary: light-dark(#686B73, #949BA8);
+      --text-active: #FFFFFF;
+
+      --border-panel: light-dark(#DFDED8, #262B36);
+      --border-card: light-dark(#E2E1DC, #2E3442);
+      --border-input: light-dark(#D8D8D2, #323846);
+
+      --accent-amber: #E5993C;
+      --accent-amber-ring: rgba(229, 153, 60, 0.22);
+
+      --lcd-bg: #19251D;
+      --lcd-border: #26382D;
+      --lcd-text: #6BE675;
+
+      --status-ok: #22C55E;
+      --status-err: #EF4444;
+
+      --font-sans: "Inter", "SF Pro Display", "Segoe UI Variable Display", -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: "Cascadia Mono", "JetBrains Mono", Consolas, monospace;
+      --transition: 130ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.38;
+      color: var(--text-primary);
+      background: var(--bg-workspace);
+      font-variant-numeric: tabular-nums;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      display: grid;
+      grid-template-columns: 204px minmax(0, 1fr);
+      height: 100vh;
+      border: 1px solid var(--sidebar-border);
+    }
+
+    button, input, select {
+      font: inherit;
+      color: inherit;
+    }
+
+    input, select {
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    .no-drag {
+      -webkit-app-region: no-drag;
+    }
+
+    /* LEFT SIDEBAR */
+    .sidebar {
+      background: var(--sidebar-bg);
+      color: var(--sidebar-text);
+      border-right: 1px solid var(--sidebar-border);
+      padding: 18px 14px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      min-width: 0;
+    }
+
+    .sidebar-top {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 2px 6px;
+    }
+
+    .brand-badge {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: var(--accent-amber);
+      color: #13161C;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .brand-name {
+      font-size: 15.5px;
+      font-weight: 600;
+      letter-spacing: -0.025em;
+      color: #FFFFFF;
+    }
+
+    .nav-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-btn {
+      width: 100%;
+      height: 40px;
+      padding: 0 12px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: var(--sidebar-muted);
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      font-size: 13.5px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      text-align: left;
+      transition: background var(--transition), color var(--transition);
+    }
+
+    .nav-btn:hover {
+      color: #FFFFFF;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .nav-btn[aria-selected="true"] {
+      background: var(--sidebar-active);
+      color: #FFFFFF;
+    }
+
+    .nav-btn svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      fill: none;
+      flex-shrink: 0;
+    }
+
+    .sidebar-bottom {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .conn-card {
+      background: var(--sidebar-surface);
+      border: 1px solid var(--sidebar-border);
+      border-radius: 11px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .conn-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--sidebar-muted);
+      flex-shrink: 0;
+    }
+
+    .conn-dot.connected {
+      background: var(--status-ok);
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+    }
+
+    .conn-title {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #FFFFFF;
+      line-height: 1.2;
+    }
+
+    .conn-port {
+      font-size: 11.5px;
+      color: var(--sidebar-muted);
+      font-family: var(--font-mono);
+      margin-top: 1px;
+    }
+
+    .theme-segmented {
+      background: var(--sidebar-surface);
+      border: 1px solid var(--sidebar-border);
+      border-radius: 10px;
+      padding: 3px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px;
+    }
+
+    .theme-seg-btn {
+      height: 30px;
+      border: none;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--sidebar-muted);
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition);
+    }
+
+    .theme-seg-btn[aria-pressed="true"] {
+      background: #FFFFFF;
+      color: #13161C;
+    }
+
+    /* RIGHT MAIN STAGE */
+    .stage {
+      display: grid;
+      grid-template-rows: 34px minmax(0, 1fr);
+      height: 100%;
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+      padding: 0 16px 16px 16px;
+    }
+
+    .window-bar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      height: 34px;
+    }
+
+    .win-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .win-btn {
+      width: 28px;
+      height: 24px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text-secondary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition);
+    }
+
+    .win-btn:hover {
+      background: rgba(128, 128, 128, 0.15);
+      color: var(--text-primary);
+    }
+
+    .win-btn.close:hover {
+      background: #DC2626;
+      color: #FFFFFF;
+    }
+
+    .win-btn svg {
+      width: 12px;
+      height: 12px;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      fill: none;
+    }
+
+    .view-section {
+      display: none;
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      min-height: 0;
+      gap: 14px;
+    }
+
+    .view-section.is-visible {
+      display: grid;
+      grid-template-columns: minmax(0, 1.32fr) minmax(0, 1fr);
+    }
+
+    .left-card,
+    .inspector-card {
+      border-radius: 20px;
+      padding: clamp(14px, 2vw, 20px);
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .left-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-panel);
+    }
+
+    .inspector-card {
+      background: var(--bg-inspector);
+      border: 1px solid var(--border-panel);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-shrink: 0;
+    }
+
+    .card-title {
+      font-size: clamp(18px, 1.8vw, 22px);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+    }
+
+    .card-subtitle {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      margin-top: 3px;
+    }
+
+    /* 4x4 KEYPAD GRID - minmax(0, 1fr) prevents column overflow/clipping */
+    .matrix-grid {
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-rows: repeat(4, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .key-tile {
+      width: 100%;
+      min-width: 0;
+      min-height: 0;
+      background: var(--bg-card);
+      border: 1.5px solid var(--border-card);
+      border-radius: 13px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: left;
+      cursor: pointer;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+      transition: background var(--transition), border-color var(--transition), box-shadow var(--transition);
+      overflow: hidden;
+    }
+
+    .key-tile:hover {
+      background: var(--bg-card-hover);
+    }
+
+    .key-tile[aria-pressed="true"],
+    .key-tile.hardware-flash {
+      background: var(--bg-active-card);
+      border-color: var(--accent-amber);
+      box-shadow: 0 0 0 2.5px var(--accent-amber-ring);
+      color: var(--text-active);
+    }
+
+    .tile-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .tile-glyph {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    .key-tile[aria-pressed="true"] .tile-glyph,
+    .key-tile.hardware-flash .tile-glyph,
+    .list-tile.is-active .tile-glyph {
+      color: var(--accent-amber);
+    }
+
+    .tile-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: transparent;
+      flex-shrink: 0;
+    }
+
+    .key-tile[aria-pressed="true"] .tile-dot,
+    .key-tile.hardware-flash .tile-dot {
+      background: var(--accent-amber);
+    }
+
+    .tile-label {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+      min-width: 0;
+    }
+
+    /* COMBOS GRID */
+    .combos-grid {
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-auto-rows: minmax(0, 1fr);
+      gap: 9px;
+    }
+
+    /* LISTS & MODE ROWS */
+    .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .list-tile {
+      width: 100%;
+      min-width: 0;
+      padding: 11px 14px;
+      background: var(--bg-card);
+      border: 1.5px solid var(--border-card);
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      cursor: pointer;
+      text-align: left;
+      overflow: hidden;
+      transition: background var(--transition), border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .list-tile:hover {
+      background: var(--bg-card-hover);
+    }
+
+    .list-tile.is-active {
+      background: var(--bg-active-card);
+      border-color: var(--accent-amber);
+      box-shadow: 0 0 0 2.5px var(--accent-amber-ring);
+      color: var(--text-active);
+    }
+
+    .tile-text-wrap {
+      min-width: 0;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .list-tile-sub {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      margin-top: 1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .list-tile.is-active .list-tile-sub {
+      color: #A1A1AA;
+    }
+
+    /* INSPECTOR PANEL ELEMENTS (Mixing World-Time Editorial Typography + LCD Preview) */
+    .inspector-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-shrink: 0;
+      min-width: 0;
+    }
+
+    .inspector-hero-left {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .inspector-figure {
+      font-size: 28px;
+      font-weight: 300;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    .inspector-heading {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.025em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+    }
+
+    .key-pill-badge {
+      padding: 5px 10px;
+      border-radius: 8px;
+      background: #16181D;
+      color: #FFFFFF;
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .micro-label {
+      display: block;
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 5px;
+    }
+
+    .lcd-preview-box {
+      background: var(--lcd-bg);
+      border: 1px solid var(--lcd-border);
+      border-radius: 11px;
+      padding: 11px 14px;
+      margin-bottom: 12px;
+      font-family: var(--font-mono);
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--lcd-text);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex-shrink: 0;
+    }
+
+    .inspector-form {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+      gap: 10px;
+    }
+
+    .field-input {
+      width: 100%;
+      height: 36px;
+      padding: 0 11px;
+      border-radius: 9px;
+      border: 1px solid var(--border-input);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-size: 13px;
+    }
+
+    .field-input.mono {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+    }
+
+    .field-input:focus {
+      outline: none;
+      border-color: var(--accent-amber);
+    }
+
+    .shortcut-chips {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 6px;
+      min-height: 24px;
+    }
+
+    .kbd-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px 8px;
+      min-width: 26px;
+      border-radius: 6px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-input);
+      box-shadow: 0 1px 0 var(--border-input);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .kbd-plus {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+    }
+
+    .inspector-footer {
+      margin-top: auto;
+      padding-top: 6px;
+      flex-shrink: 0;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-save {
+      flex: 1;
+      height: 38px;
+      border: none;
+      border-radius: 10px;
+      background: #16181D;
+      color: #FFFFFF;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity var(--transition);
+    }
+
+    .btn-save:hover {
+      opacity: 0.9;
+    }
+
+    .btn-test {
+      height: 38px;
+      padding: 0 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border-input);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+
+    .btn-test:hover {
+      background: var(--bg-card-hover);
+    }
+
+    .btn-small {
+      height: 30px;
+      padding: 0 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-input);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .save-toast {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--status-ok);
+      min-height: 15px;
+      margin-top: 5px;
+    }
+
+    /* JOYSTICK RADAR & MODES ROW */
+    .radar-stage {
+      flex: 1;
+      min-height: 120px;
+      border-radius: 14px;
+      border: 1px solid var(--border-card);
+      background: var(--bg-card);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .radar-axis-x {
+      position: absolute;
+      width: 100%;
+      height: 1px;
+      background: var(--border-panel);
+    }
+
+    .radar-axis-y {
+      position: absolute;
+      height: 100%;
+      width: 1px;
+      background: var(--border-panel);
+    }
+
+    .radar-puck {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #16181D;
+      border: 2px solid var(--accent-amber);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      font-weight: 600;
+      transition: transform 40ms linear;
+    }
+
+    .joy-modes-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 9px;
+      flex-shrink: 0;
+    }
+
+    .joy-dir-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LEFT DARK SIDEBAR -->
+  <aside class="sidebar pywebview-drag-region">
+    <div class="sidebar-top">
+      <div class="brand-row">
+        <div class="brand-badge">rU</div>
+        <span class="brand-name">rUNOdeck</span>
+      </div>
+
+      <nav class="nav-stack no-drag" role="tablist" aria-label="Main Navigation">
+        <button type="button" class="nav-btn" role="tab" id="tabBtn-keypad" aria-selected="true" onclick="switchView('keypad')">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          <span>Keypad</span>
+        </button>
+
+        <button type="button" class="nav-btn" role="tab" id="tabBtn-combos" aria-selected="false" onclick="switchView('combos')">
+          <svg viewBox="0 0 24 24"><path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9"/></svg>
+          <span>Combos</span>
+        </button>
+
+        <button type="button" class="nav-btn" role="tab" id="tabBtn-audio" aria-selected="false" onclick="switchView('audio')">
+          <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          <span>Audio</span>
+        </button>
+
+        <button type="button" class="nav-btn" role="tab" id="tabBtn-joystick" aria-selected="false" onclick="switchView('joystick')">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg>
+          <span>Joystick</span>
+        </button>
+      </nav>
+    </div>
+
+    <div class="sidebar-bottom no-drag">
+      <div class="conn-card" role="status" aria-live="polite">
+        <span id="statusDot" class="conn-dot"></span>
+        <div>
+          <div id="statusTitle" class="conn-title">Scanning</div>
+          <div id="statusPort" class="conn-port">COM7</div>
+        </div>
+      </div>
+
+      <div class="theme-segmented" role="group" aria-label="Color Theme">
+        <button type="button" class="theme-seg-btn" id="btnThemeLight" aria-pressed="true" onclick="setScheme('light')">Light</button>
+        <button type="button" class="theme-seg-btn" id="btnThemeDark" aria-pressed="false" onclick="setScheme('dark')">Dark</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- RIGHT MAIN STAGE -->
+  <div class="stage">
+    <header class="window-bar pywebview-drag-region">
+      <div class="win-controls no-drag">
+        <button type="button" class="win-btn" title="Minimize" onclick="winMinimize()">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <button type="button" class="win-btn" title="Maximize" onclick="winMaximize()">
+          <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+        </button>
+        <button type="button" class="win-btn close" title="Close to Tray" onclick="winClose()">
+          <svg viewBox="0 0 24 24"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- VIEW 1: KEYPAD -->
+    <section id="view-keypad" class="view-section is-visible" aria-label="Keypad">
+      <div class="left-card">
+        <div class="card-header">
+          <div>
+            <h1 class="card-title">Keypad</h1>
+            <p class="card-subtitle">Pick a key to edit what it does. Layout mirrors your hardware.</p>
+          </div>
+        </div>
+        <div class="matrix-grid" id="keypadGrid" role="grid"></div>
+      </div>
+
+      <aside class="inspector-card" aria-label="Key Inspector">
+        <div class="inspector-top">
+          <div class="inspector-hero-left">
+            <span class="inspector-figure" id="inspectorBigNum">08</span>
+            <h2 class="inspector-heading" id="inspectorTitle">Next Desktop</h2>
+          </div>
+          <span class="key-pill-badge" id="inspectorCoord">Key 8</span>
+        </div>
+
+        <span class="micro-label">LCD PREVIEW</span>
+        <div class="lcd-preview-box" id="keyLcdPreview">Next Desktop</div>
+
+        <form id="keyForm" class="inspector-form" onsubmit="saveKeyConfig(event)">
+          <div>
+            <label class="micro-label" for="inputKeyName">LABEL (SHOWN ON LCD)</label>
+            <input type="text" id="inputKeyName" class="field-input" oninput="updateKeyPreview()" required>
+          </div>
+
+          <div>
+            <label class="micro-label" for="selectKeyType">ACTION</label>
+            <select id="selectKeyType" class="field-input" onchange="updateTargetHint()">
+              <option value="hotkey">Keyboard Shortcut</option>
+              <option value="app">Open App</option>
+              <option value="url">Open Website</option>
+              <option value="audio">Switch Audio</option>
+              <option value="media">Media Key</option>
+              <option value="device">Toggle LCD Light</option>
+              <option value="text">Type Text</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="micro-label" for="inputKeyTarget" id="targetLabel">SHORTCUT</label>
+            <input type="text" id="inputKeyTarget" class="field-input mono" oninput="renderKeyChips()" required>
+            <div class="shortcut-chips" id="keyShortcutChips"></div>
+          </div>
+
+          <div class="inspector-footer">
+            <div class="btn-row">
+              <button type="submit" class="btn-save">Save</button>
+              <button type="button" class="btn-test" onclick="triggerSelectedKey()">Test</button>
+            </div>
+            <div id="keySaveFeedback" class="save-toast" role="status" aria-live="polite"></div>
+          </div>
+        </form>
+      </aside>
+    </section>
+
+    <!-- VIEW 2: COMBOS -->
+    <section id="view-combos" class="view-section" aria-label="Combos">
+      <div class="left-card">
+        <div class="card-header">
+          <div>
+            <h1 class="card-title">Combos</h1>
+            <p class="card-subtitle">Press * followed by a key on your keypad to open apps or switch audio.</p>
+          </div>
+        </div>
+        <div class="combos-grid" id="combosList"></div>
+      </div>
+
+      <aside class="inspector-card" aria-label="Combo Inspector">
+        <div class="inspector-top">
+          <div class="inspector-hero-left">
+            <span class="inspector-figure" id="comboBigNum">*4</span>
+            <h2 class="inspector-heading" id="comboTitle">Speakers Output</h2>
+          </div>
+          <span class="key-pill-badge" id="comboCoord">* + 4</span>
+        </div>
+
+        <span class="micro-label">LCD PREVIEW</span>
+        <div class="lcd-preview-box" id="comboLcdPreview">Out: Speakers</div>
+
+        <form id="comboForm" class="inspector-form" onsubmit="saveComboConfig(event)">
+          <div>
+            <label class="micro-label" for="inputComboName">LABEL (SHOWN ON LCD)</label>
+            <input type="text" id="inputComboName" class="field-input" oninput="updateComboPreview()" required>
+          </div>
+
+          <div>
+            <label class="micro-label" for="selectComboType">ACTION</label>
+            <select id="selectComboType" class="field-input" onchange="updateComboPreview()">
+              <option value="app">Open App</option>
+              <option value="url">Open Website</option>
+              <option value="audio">Switch Audio</option>
+              <option value="hotkey">Keyboard Shortcut</option>
+              <option value="device">Toggle LCD Light</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="micro-label" for="inputComboTarget">TARGET</label>
+            <input type="text" id="inputComboTarget" class="field-input mono" oninput="renderComboChips()" required>
+            <div class="shortcut-chips" id="comboShortcutChips"></div>
+          </div>
+
+          <div class="inspector-footer">
+            <div class="btn-row">
+              <button type="submit" class="btn-save">Save</button>
+              <button type="button" class="btn-test" onclick="triggerSelectedCombo()">Test</button>
+            </div>
+            <div id="comboSaveFeedback" class="save-toast" role="status" aria-live="polite"></div>
+          </div>
+        </form>
+      </aside>
+    </section>
+
+    <!-- VIEW 3: AUDIO -->
+    <section id="view-audio" class="view-section" aria-label="Audio Output">
+      <div class="left-card">
+        <div class="card-header">
+          <div>
+            <h1 class="card-title">Audio Output</h1>
+            <p class="card-subtitle">Select a device to switch your active Windows playback output.</p>
+          </div>
+          <button type="button" class="btn-small" onclick="loadAudioDevices()">Refresh</button>
+        </div>
+        <div id="audioStateContainer" class="item-list"></div>
+      </div>
+
+      <aside class="inspector-card" aria-label="Quick Audio Chords">
+        <div class="inspector-top">
+          <div class="inspector-hero-left">
+            <span class="inspector-figure">03</span>
+            <h2 class="inspector-heading">Keypad Chords</h2>
+          </div>
+          <span class="key-pill-badge">Audio</span>
+        </div>
+
+        <span class="micro-label">LCD PREVIEW</span>
+        <div class="lcd-preview-box" id="audioLcdPreview">Out: Speakers</div>
+
+        <p class="card-subtitle" style="margin-bottom: 12px;">Press * then 4, 5, or C on your keypad.</p>
+
+        <div class="item-list" style="flex: 0;">
+          <button type="button" class="list-tile is-active" onclick="switchAudioEndpoint('Speakers', this)">
+            <span class="tile-label">Speakers</span>
+            <span class="tile-glyph">* + 4</span>
+          </button>
+          <button type="button" class="list-tile" onclick="switchAudioEndpoint('Headphones', this)">
+            <span class="tile-label">Headphones</span>
+            <span class="tile-glyph">* + 5</span>
+          </button>
+          <button type="button" class="list-tile" onclick="switchAudioEndpoint('Earphone', this)">
+            <span class="tile-label">Earphone Jack</span>
+            <span class="tile-glyph">* + C</span>
+          </button>
+        </div>
+      </aside>
+    </section>
+
+    <!-- VIEW 4: JOYSTICK -->
+    <section id="view-joystick" class="view-section" aria-label="Joystick">
+      <div class="left-card">
+        <div class="card-header">
+          <div>
+            <h1 class="card-title">Joystick</h1>
+            <p class="card-subtitle">Press the physical stick button to cycle between modes.</p>
+          </div>
+          <button type="button" class="btn-small" onclick="calibrateStick()">Calibrate</button>
+        </div>
+
+        <div class="radar-stage">
+          <div class="radar-axis-x"></div>
+          <div class="radar-axis-y"></div>
+          <div class="radar-puck" id="stickThumb">0,0</div>
+        </div>
+        <div id="calibFeedback" class="save-toast" role="status" aria-live="polite" style="margin-top: 0; margin-bottom: 6px;"></div>
+
+        <div class="joy-modes-grid">
+          <button type="button" class="key-tile" id="modeCard-MEDIA" aria-pressed="true" onclick="selectHardwareStickMode('MEDIA')">
+            <div class="tile-top">
+              <span class="tile-glyph">M1</span>
+              <span class="tile-dot"></span>
+            </div>
+            <div>
+              <div class="tile-label">Shortcuts</div>
+              <div class="list-tile-sub">Vol &amp; Tabs</div>
+            </div>
+          </button>
+
+          <button type="button" class="key-tile" id="modeCard-MOUSE" aria-pressed="false" onclick="selectHardwareStickMode('MOUSE')">
+            <div class="tile-top">
+              <span class="tile-glyph">M2</span>
+              <span class="tile-dot"></span>
+            </div>
+            <div>
+              <div class="tile-label">Mouse</div>
+              <div class="list-tile-sub">Move Cursor</div>
+            </div>
+          </button>
+
+          <button type="button" class="key-tile" id="modeCard-SCROLL" aria-pressed="false" onclick="selectHardwareStickMode('SCROLL')">
+            <div class="tile-top">
+              <span class="tile-glyph">M3</span>
+              <span class="tile-dot"></span>
+            </div>
+            <div>
+              <div class="tile-label">Scroll</div>
+              <div class="list-tile-sub">Page Scroll</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <aside class="inspector-card" aria-label="Stick Directions">
+        <div class="inspector-top">
+          <div class="inspector-hero-left">
+            <span class="inspector-figure" id="joyBigCode">UP</span>
+            <h2 class="inspector-heading" id="joyInspectorTitle">Volume Up</h2>
+          </div>
+          <span class="key-pill-badge" id="joyCoordBadge">Stick Up</span>
+        </div>
+
+        <span class="micro-label">LCD PREVIEW</span>
+        <div class="lcd-preview-box" id="joyLcdPreview">Volume Up</div>
+
+        <div class="joy-dir-grid" id="joyBindingsList"></div>
+
+        <form id="joyForm" class="inspector-form" onsubmit="saveJoyConfig(event)">
+          <div>
+            <label class="micro-label" for="inputJoyName">LABEL (SHOWN ON LCD)</label>
+            <input type="text" id="inputJoyName" class="field-input" oninput="updateJoyPreview()" required>
+          </div>
+
+          <div>
+            <label class="micro-label" for="selectJoyType">ACTION</label>
+            <select id="selectJoyType" class="field-input" onchange="updateJoyPreview()">
+              <option value="media">Media Key</option>
+              <option value="hotkey">Keyboard Shortcut</option>
+              <option value="audio">Switch Audio</option>
+              <option value="app">Open App</option>
+              <option value="url">Open Website</option>
+              <option value="device">Toggle LCD Light</option>
+              <option value="text">Type Text</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="micro-label" for="inputJoyTarget">TARGET</label>
+            <input type="text" id="inputJoyTarget" class="field-input mono" oninput="renderJoyChips()" required>
+            <div class="shortcut-chips" id="joyShortcutChips"></div>
+          </div>
+
+          <div class="inspector-footer">
+            <div class="btn-row">
+              <button type="submit" class="btn-save">Save</button>
+              <button type="button" class="btn-test" onclick="triggerSelectedJoy()">Test</button>
+            </div>
+            <div id="joySaveFeedback" class="save-toast" role="status" aria-live="polite"></div>
+          </div>
+        </form>
+      </aside>
+    </section>
+  </div>
+
+  <script>
+    const HARDWARE_LAYOUT = [
+      ['1', '2', '3', 'A'],
+      ['4', '5', '6', 'B'],
+      ['7', '8', '9', 'C'],
+      ['*', '0', '#', 'D']
+    ];
+
+    const COMBO_ORDER = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0'];
+    const JOY_DIRECTIONS = [
+      { key: 'UP', label: 'Up', code: 'UP' },
+      { key: 'DOWN', label: 'Down', code: 'DN' },
+      { key: 'LEFT', label: 'Left', code: 'LT' },
+      { key: 'RIGHT', label: 'Right', code: 'RT' }
+    ];
+
+    let currentConfig = {
+      keys: {},
+      combos: {},
+      joystick_bindings: {
+        UP: { name: 'Volume Up', type: 'media', target: 'volumeup' },
+        DOWN: { name: 'Volume Down', type: 'media', target: 'volumedown' },
+        LEFT: { name: 'Previous Tab', type: 'hotkey', target: 'ctrl+shift+tab' },
+        RIGHT: { name: 'Next Tab', type: 'hotkey', target: 'ctrl+tab' }
+      }
+    };
+    let selectedKey = '8';
+    let selectedCombo = '4';
+    let selectedJoyDir = 'UP';
+    let activeAudioKeyword = 'Speakers';
+
+    function winMinimize() {
+      if (window.pywebview && window.pywebview.api) window.pywebview.api.window_minimize();
+    }
+    function winMaximize() {
+      if (window.pywebview && window.pywebview.api) window.pywebview.api.window_maximize();
+    }
+    function winClose() {
+      if (window.pywebview && window.pywebview.api) window.pywebview.api.window_close();
+    }
+
+    function syncThemeButtons() {
+      const current = document.querySelector('meta[name="color-scheme"]').content;
+      const isDark = current === 'dark';
+      document.getElementById('btnThemeLight').setAttribute('aria-pressed', String(!isDark));
+      document.getElementById('btnThemeDark').setAttribute('aria-pressed', String(isDark));
+    }
+
+    function setScheme(scheme) {
+      document.querySelector('meta[name="color-scheme"]').content = scheme;
+      try {
+        localStorage.setItem('color-scheme', scheme);
+      } catch (e) {}
+      syncThemeButtons();
+    }
+
+    function switchView(viewId) {
+      document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('is-visible'));
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.setAttribute('aria-selected', 'false'));
+
+      const targetSec = document.getElementById('view-' + viewId);
+      const targetBtn = document.getElementById('tabBtn-' + viewId);
+      if (targetSec) targetSec.classList.add('is-visible');
+      if (targetBtn) targetBtn.setAttribute('aria-selected', 'true');
+
+      if (viewId === 'audio') {
+        loadAudioDevices();
+      }
+    }
+
+    function findKeyIndex(keyId) {
+      for (let r = 0; r < HARDWARE_LAYOUT.length; r++) {
+        const c = HARDWARE_LAYOUT[r].indexOf(keyId);
+        if (c !== -1) return r * 4 + c + 1;
+      }
+      return 1;
+    }
+
+    function formatKeyToken(token) {
+      const t = token.trim().toLowerCase();
+      const map = {
+        ctrl: 'Ctrl',
+        control: 'Ctrl',
+        shift: 'Shift',
+        alt: 'Alt',
+        win: 'Win',
+        windows: 'Win',
+        left: '←',
+        right: '→',
+        up: '↑',
+        down: '↓',
+        esc: 'Esc',
+        escape: 'Esc',
+        tab: 'Tab',
+        enter: 'Enter',
+        space: 'Space',
+        playpause: 'Play / Pause',
+        volumemute: 'Mute',
+        volumeup: 'Vol +',
+        volumedown: 'Vol −'
+      };
+      if (map[t]) return map[t];
+      return t.length === 1 ? t.toUpperCase() : (t.charAt(0).toUpperCase() + t.slice(1));
+    }
+
+    function buildChipsHtml(actionType, targetStr) {
+      if (!targetStr) return '';
+      if (actionType === 'hotkey') {
+        const parts = targetStr.split('+').map(s => s.trim()).filter(Boolean);
+        return parts.map((p, idx) => {
+          const chip = `<span class="kbd-chip">${formatKeyToken(p)}</span>`;
+          return idx < parts.length - 1 ? `${chip}<span class="kbd-plus">+</span>` : chip;
+        }).join('');
+      }
+      if (actionType === 'media') {
+        return `<span class="kbd-chip">${formatKeyToken(targetStr)}</span>`;
+      }
+      return '';
+    }
+
+    function formatLcdText(actionType, labelStr) {
+      const clean = (labelStr || '').trim() || 'Ready';
+      if (actionType === 'app' || actionType === 'url') {
+        return clean.length <= 10 ? `Open: ${clean}` : clean.slice(0, 16);
+      }
+      if (actionType === 'audio') {
+        return clean.length <= 11 ? `Out: ${clean}` : clean.slice(0, 16);
+      }
+      return clean.slice(0, 16);
+    }
+
+    function renderKeypad() {
+      const grid = document.getElementById('keypadGrid');
+      grid.innerHTML = '';
+
+      HARDWARE_LAYOUT.forEach(row => {
+        row.forEach(keyId => {
+          const cfg = currentConfig.keys[keyId] || {
+            name: keyId === '*' ? 'Combos' : 'Unassigned',
+            type: keyId === '*' ? 'layer' : 'hotkey',
+            target: ''
+          };
+
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'key-tile';
+          btn.id = 'key-' + keyId;
+          btn.setAttribute('aria-pressed', String(selectedKey === keyId));
+          btn.onclick = () => selectKey(keyId);
+
+          btn.innerHTML = `
+            <div class="tile-top">
+              <span class="tile-glyph">${keyId}</span>
+              <span class="tile-dot"></span>
+            </div>
+            <div class="tile-label">${cfg.name}</div>
+          `;
+          grid.appendChild(btn);
+        });
+      });
+    }
+
+    function selectKey(keyId) {
+      selectedKey = keyId;
+      document.querySelectorAll('#keypadGrid .key-tile').forEach(el => {
+        el.setAttribute('aria-pressed', String(el.id === 'key-' + keyId));
+      });
+
+      const cfg = currentConfig.keys[keyId] || {
+        name: keyId === '*' ? 'Combos' : 'Unassigned',
+        type: 'hotkey',
+        target: ''
+      };
+
+      const idx = findKeyIndex(keyId);
+      document.getElementById('inspectorBigNum').textContent = String(idx).padStart(2, '0');
+      document.getElementById('inspectorCoord').textContent = 'Key ' + keyId;
+      document.getElementById('inspectorTitle').textContent = cfg.name || ('Key ' + keyId);
+      document.getElementById('inputKeyName').value = cfg.name || '';
+      document.getElementById('selectKeyType').value = cfg.type === 'layer' ? 'hotkey' : (cfg.type || 'hotkey');
+      document.getElementById('inputKeyTarget').value = cfg.target || '';
+      document.getElementById('keySaveFeedback').textContent = '';
+
+      updateTargetHint();
+      updateKeyPreview();
+      renderKeyChips();
+    }
+
+    function updateKeyPreview() {
+      const name = document.getElementById('inputKeyName').value;
+      const type = document.getElementById('selectKeyType').value;
+      document.getElementById('inspectorTitle').textContent = name || ('Key ' + selectedKey);
+      document.getElementById('keyLcdPreview').textContent = formatLcdText(type, name);
+    }
+
+    function renderKeyChips() {
+      const type = document.getElementById('selectKeyType').value;
+      const target = document.getElementById('inputKeyTarget').value;
+      document.getElementById('keyShortcutChips').innerHTML = buildChipsHtml(type, target);
+    }
+
+    function updateTargetHint() {
+      const type = document.getElementById('selectKeyType').value;
+      const label = document.getElementById('targetLabel');
+      const input = document.getElementById('inputKeyTarget');
+
+      const map = {
+        hotkey: ['SHORTCUT', 'e.g. ctrl+shift+m'],
+        app: ['APPLICATION PATH OR URI', 'e.g. spotify: or calc'],
+        url: ['WEBSITE URL', 'e.g. https://youtube.com'],
+        audio: ['PLAYBACK DEVICE', 'e.g. Speakers, Headphones'],
+        media: ['MEDIA KEY', 'e.g. playpause, volumemute'],
+        device: ['HARDWARE COMMAND', 'toggle_led'],
+        text: ['TEXT SNIPPET', 'e.g. Hello world']
+      };
+      const [lbl, ph] = map[type] || ['TARGET', ''];
+      label.textContent = lbl;
+      input.placeholder = ph;
+      updateKeyPreview();
+      renderKeyChips();
+    }
+
+    function saveKeyConfig(e) {
+      e.preventDefault();
+      const name = document.getElementById('inputKeyName').value.trim();
+      const type = document.getElementById('selectKeyType').value;
+      const target = document.getElementById('inputKeyTarget').value.trim();
+
+      currentConfig.keys[selectedKey] = { name, type, target };
+      renderKeypad();
+
+      if (window.pywebview) {
+        window.pywebview.api.save_config(currentConfig).then(() => {
+          document.getElementById('keySaveFeedback').textContent = `Saved Key ${selectedKey}`;
+        });
+      }
+    }
+
+    function triggerSelectedKey() {
+      const name = document.getElementById('inputKeyName').value.trim();
+      const type = document.getElementById('selectKeyType').value;
+      const target = document.getElementById('inputKeyTarget').value.trim();
+      if (window.pywebview && target) {
+        window.pywebview.api.execute_action(type, target, name);
+      }
+    }
+
+    function renderCombos() {
+      const list = document.getElementById('combosList');
+      list.innerHTML = '';
+
+      COMBO_ORDER.forEach(k => {
+        const item = currentConfig.combos[k] || { name: 'Unassigned', type: 'app', target: '' };
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'key-tile';
+        btn.setAttribute('aria-pressed', String(selectedCombo === k));
+        btn.onclick = () => selectCombo(k);
+
+        btn.innerHTML = `
+          <div class="tile-top">
+            <span class="tile-glyph">* + ${k}</span>
+            <span class="tile-dot"></span>
+          </div>
+          <div class="tile-label">${item.name}</div>
+        `;
+        list.appendChild(btn);
+      });
+    }
+
+    function selectCombo(comboKey) {
+      selectedCombo = comboKey;
+      renderCombos();
+      const item = currentConfig.combos[comboKey] || { name: '', type: 'app', target: '' };
+      document.getElementById('comboBigNum').textContent = '*' + comboKey;
+      document.getElementById('comboCoord').textContent = '* + ' + comboKey;
+      document.getElementById('comboTitle').textContent = item.name || ('* + ' + comboKey);
+      document.getElementById('inputComboName').value = item.name || '';
+      document.getElementById('selectComboType').value = item.type || 'app';
+      document.getElementById('inputComboTarget').value = item.target || '';
+      document.getElementById('comboSaveFeedback').textContent = '';
+      updateComboPreview();
+      renderComboChips();
+    }
+
+    function updateComboPreview() {
+      const name = document.getElementById('inputComboName').value;
+      const type = document.getElementById('selectComboType').value;
+      document.getElementById('comboTitle').textContent = name || ('* + ' + selectedCombo);
+      document.getElementById('comboLcdPreview').textContent = formatLcdText(type, name);
+      renderComboChips();
+    }
+
+    function renderComboChips() {
+      const type = document.getElementById('selectComboType').value;
+      const target = document.getElementById('inputComboTarget').value;
+      document.getElementById('comboShortcutChips').innerHTML = buildChipsHtml(type, target);
+    }
+
+    function saveComboConfig(e) {
+      e.preventDefault();
+      const name = document.getElementById('inputComboName').value.trim();
+      const type = document.getElementById('selectComboType').value;
+      const target = document.getElementById('inputComboTarget').value.trim();
+
+      currentConfig.combos[selectedCombo] = { name, type, target };
+      renderCombos();
+
+      if (window.pywebview) {
+        window.pywebview.api.save_config(currentConfig).then(() => {
+          document.getElementById('comboSaveFeedback').textContent = `Saved * + ${selectedCombo}`;
+        });
+      }
+    }
+
+    function triggerSelectedCombo() {
+      const name = document.getElementById('inputComboName').value.trim();
+      const type = document.getElementById('selectComboType').value;
+      const target = document.getElementById('inputComboTarget').value.trim();
+      if (window.pywebview && target) {
+        window.pywebview.api.execute_action(type, target, name);
+      }
+    }
+
+    function switchAudioEndpoint(keyword, rowEl) {
+      activeAudioKeyword = keyword;
+      const preview = document.getElementById('audioLcdPreview');
+      if (preview) preview.textContent = formatLcdText('audio', keyword);
+      if (rowEl) {
+        const parent = rowEl.parentElement;
+        parent.querySelectorAll('.list-tile').forEach(r => r.classList.remove('is-active'));
+        rowEl.classList.add('is-active');
+      }
+      if (window.pywebview) {
+        window.pywebview.api.execute_action('audio', keyword, keyword);
+      }
+    }
+
+    function loadAudioDevices() {
+      const container = document.getElementById('audioStateContainer');
+      container.innerHTML = `<div class="list-tile"><span>Scanning audio devices...</span></div>`;
+
+      if (!window.pywebview) {
+        container.innerHTML = `<div class="list-tile"><span>Open from desktop app to view audio devices.</span></div>`;
+        return;
+      }
+
+      window.pywebview.api.get_audio_devices().then(devices => {
+        if (!Array.isArray(devices) || devices.length === 0) {
+          container.innerHTML = `<div class="list-tile"><span>No playback devices found.</span></div>`;
+          return;
+        }
+
+        container.innerHTML = '';
+        devices.forEach((dev, idx) => {
+          const isSelected = dev.name.toLowerCase().includes(activeAudioKeyword.toLowerCase());
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'list-tile' + (isSelected ? ' is-active' : '');
+          btn.onclick = () => switchAudioEndpoint(dev.name, btn);
+
+          btn.innerHTML = `
+            <span class="tile-label">${dev.name}</span>
+            <span class="tile-glyph">0${idx + 1}</span>
+          `;
+          container.appendChild(btn);
+        });
+      }).catch(() => {
+        container.innerHTML = `<div class="list-tile"><span>Unable to read audio devices.</span></div>`;
+      });
+    }
+
+    window.onPhysicalKeyPress = function(keyId) {
+      selectKey(keyId);
+      const keyEl = document.getElementById('key-' + keyId);
+      if (keyEl) {
+        keyEl.classList.add('hardware-flash');
+        setTimeout(() => keyEl.classList.remove('hardware-flash'), 160);
+      }
+    };
+
+    window.onComboTriggered = function(comboKey) {
+      selectCombo(comboKey);
+    };
+
+    window.onHardwareStatus = function(connected, port) {
+      const dot = document.getElementById('statusDot');
+      const title = document.getElementById('statusTitle');
+      const portEl = document.getElementById('statusPort');
+      if (connected) {
+        dot.className = 'conn-dot connected';
+        title.textContent = 'Connected';
+        portEl.textContent = port;
+      } else {
+        dot.className = 'conn-dot';
+        title.textContent = 'Searching';
+        portEl.textContent = port;
+      }
+    };
+
+    window.onModeChange = function(modeName) {
+      ['MEDIA', 'MOUSE', 'SCROLL'].forEach(m => {
+        const el = document.getElementById('modeCard-' + m);
+        if (el) el.setAttribute('aria-pressed', String(m === modeName));
+      });
+    };
+
+    function selectHardwareStickMode(modeName) {
+      window.onModeChange(modeName);
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.set_joystick_mode) {
+        window.pywebview.api.set_joystick_mode(modeName);
+      }
+    }
+
+    function calibrateStick() {
+      const fb = document.getElementById('calibFeedback');
+      if (fb) fb.textContent = 'Calibrating...';
+      window.onJoystickTelemetry(0, 0);
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.calibrate_joystick) {
+        window.pywebview.api.calibrate_joystick();
+      }
+    }
+
+    window.onJoystickCalibrated = function(cx, cy) {
+      const fb = document.getElementById('calibFeedback');
+      if (fb) fb.textContent = `Calibrated (${cx}, ${cy})`;
+      window.onJoystickTelemetry(0, 0);
+    };
+
+    window.onJoystickTelemetry = function(nx, ny) {
+      const thumb = document.getElementById('stickThumb');
+      if (thumb) {
+        const x = Math.max(-55, Math.min(55, Math.round(nx * 0.55)));
+        const y = Math.max(-45, Math.min(45, Math.round(ny * 0.45)));
+        thumb.style.transform = `translate(${x}px, ${y}px)`;
+        thumb.textContent = `${nx},${ny}`;
+      }
+    };
+
+    window.onJoystickDirection = function(dirKey) {
+      selectJoyDirection(dirKey);
+    };
+
+    function renderJoyBindings() {
+      const list = document.getElementById('joyBindingsList');
+      if (!list) return;
+      list.innerHTML = '';
+      if (!currentConfig.joystick_bindings) currentConfig.joystick_bindings = {};
+
+      JOY_DIRECTIONS.forEach(d => {
+        const item = currentConfig.joystick_bindings[d.key] || { name: 'Unassigned', type: 'hotkey', target: '' };
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'list-tile' + (selectedJoyDir === d.key ? ' is-active' : '');
+        btn.onclick = () => selectJoyDirection(d.key);
+
+        btn.innerHTML = `
+          <div class="tile-text-wrap">
+            <div class="tile-label">${item.name}</div>
+            <div class="list-tile-sub">${d.label}</div>
+          </div>
+          <span class="tile-glyph">${d.code}</span>
+        `;
+        list.appendChild(btn);
+      });
+    }
+
+    function selectJoyDirection(dirKey) {
+      selectedJoyDir = dirKey;
+      renderJoyBindings();
+      if (!currentConfig.joystick_bindings) currentConfig.joystick_bindings = {};
+      const item = currentConfig.joystick_bindings[dirKey] || { name: '', type: 'hotkey', target: '' };
+      const meta = JOY_DIRECTIONS.find(d => d.key === dirKey) || { label: dirKey, code: dirKey };
+      document.getElementById('joyBigCode').textContent = meta.code;
+      document.getElementById('joyInspectorTitle').textContent = item.name || meta.label;
+      document.getElementById('joyCoordBadge').textContent = 'Stick ' + meta.label;
+      document.getElementById('inputJoyName').value = item.name || '';
+      document.getElementById('selectJoyType').value = item.type || 'hotkey';
+      document.getElementById('inputJoyTarget').value = item.target || '';
+      document.getElementById('joySaveFeedback').textContent = '';
+      updateJoyPreview();
+      renderJoyChips();
+    }
+
+    function updateJoyPreview() {
+      const name = document.getElementById('inputJoyName').value;
+      const type = document.getElementById('selectJoyType').value;
+      document.getElementById('joyInspectorTitle').textContent = name || selectedJoyDir;
+      document.getElementById('joyLcdPreview').textContent = formatLcdText(type, name);
+      renderJoyChips();
+    }
+
+    function renderJoyChips() {
+      const type = document.getElementById('selectJoyType').value;
+      const target = document.getElementById('inputJoyTarget').value;
+      document.getElementById('joyShortcutChips').innerHTML = buildChipsHtml(type, target);
+    }
+
+    function saveJoyConfig(e) {
+      e.preventDefault();
+      const name = document.getElementById('inputJoyName').value.trim();
+      const type = document.getElementById('selectJoyType').value;
+      const target = document.getElementById('inputJoyTarget').value.trim();
+
+      if (!currentConfig.joystick_bindings) currentConfig.joystick_bindings = {};
+      currentConfig.joystick_bindings[selectedJoyDir] = { name, type, target };
+      renderJoyBindings();
+
+      if (window.pywebview) {
+        window.pywebview.api.save_config(currentConfig).then(() => {
+          document.getElementById('joySaveFeedback').textContent = `Saved ${selectedJoyDir}`;
+        });
+      }
+    }
+
+    function triggerSelectedJoy() {
+      const name = document.getElementById('inputJoyName').value.trim();
+      const type = document.getElementById('selectJoyType').value;
+      const target = document.getElementById('inputJoyTarget').value.trim();
+      if (window.pywebview && target) {
+        window.pywebview.api.execute_action(type, target, name);
+      }
+    }
+
+    window.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        document.getElementById('keySaveFeedback').textContent = '';
+        document.getElementById('comboSaveFeedback').textContent = '';
+        document.getElementById('joySaveFeedback').textContent = '';
+      }
+    });
+
+    syncThemeButtons();
+
+    function pollHardwareStatus() {
+      if (!window.pywebview || !window.pywebview.api || !window.pywebview.api.get_hardware_status) return;
+      window.pywebview.api.get_hardware_status().then(st => {
+        if (st) {
+          window.onHardwareStatus(st.connected, st.port);
+          if (st.mode) window.onModeChange(st.mode);
+        }
+      }).catch(() => {});
+    }
+
+    window.addEventListener('pywebviewready', function() {
+      window.pywebview.api.get_config().then(cfg => {
+        currentConfig = cfg;
+        renderKeypad();
+        renderCombos();
+        renderJoyBindings();
+        selectKey('8');
+        selectCombo('4');
+        selectJoyDirection('UP');
+      });
+      pollHardwareStatus();
+      setInterval(pollHardwareStatus, 1500);
+    });
+
+    renderKeypad();
+    renderCombos();
+    renderJoyBindings();
+    selectKey('8');
+    selectCombo('4');
+    selectJoyDirection('UP');
+  </script>
+</body>
+</html>

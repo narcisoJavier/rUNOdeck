@@ -1,0 +1,163 @@
+{
+  "keys": {
+    "0": {
+      "name": "Mute Audio",
+      "type": "media",
+      "target": "volumemute"
+    },
+    "1": {
+      "name": "Mute Mic",
+      "type": "hotkey",
+      "target": "ctrl+shift+m"
+    },
+    "2": {
+      "name": "Screenshot",
+      "type": "hotkey",
+      "target": "win+shift+s"
+    },
+    "3": {
+      "name": "Copy",
+      "type": "hotkey",
+      "target": "ctrl+c"
+    },
+    "4": {
+      "name": "Paste",
+      "type": "hotkey",
+      "target": "ctrl+v"
+    },
+    "5": {
+      "name": "Spotify",
+      "type": "app",
+      "target": "spotify:"
+    },
+    "6": {
+      "name": "YouTube",
+      "type": "url",
+      "target": "https://youtube.com"
+    },
+    "7": {
+      "name": "Prev Desktop",
+      "type": "hotkey",
+      "target": "ctrl+win+left"
+    },
+    "8": {
+      "name": "Next Desktop",
+      "type": "hotkey",
+      "target": "ctrl+win+right"
+    },
+    "9": {
+      "name": "Calculator",
+      "type": "app",
+      "target": "calc"
+    },
+    "A": {
+      "name": "Task Manager",
+      "type": "hotkey",
+      "target": "ctrl+shift+esc"
+    },
+    "B": {
+      "name": "Alt + Tab",
+      "type": "hotkey",
+      "target": "alt+tab"
+    },
+    "C": {
+      "name": "File Explorer",
+      "type": "hotkey",
+      "target": "win+e"
+    },
+    "D": {
+      "name": "Show Desktop",
+      "type": "hotkey",
+      "target": "win+d"
+    },
+    "#": {
+      "name": "Play / Pause",
+      "type": "media",
+      "target": "playpause"
+    }
+  },
+  "combos": {
+    "1": {
+      "name": "Discord",
+      "type": "app",
+      "target": "discord:"
+    },
+    "2": {
+      "name": "VS Code",
+      "type": "app",
+      "target": "code"
+    },
+    "3": {
+      "name": "Terminal",
+      "type": "app",
+      "target": "wt"
+    },
+    "4": {
+      "name": "Speakers Output",
+      "type": "audio",
+      "target": "Speakers"
+    },
+    "5": {
+      "name": "Headphones Output",
+      "type": "audio",
+      "target": "Headphones"
+    },
+    "6": {
+      "name": "GitHub",
+      "type": "url",
+      "target": "https://github.com"
+    },
+    "C": {
+      "name": "Earphone Jack",
+      "type": "audio",
+      "target": "Earphone"
+    },
+    "7": {
+      "name": "ChatGPT",
+      "type": "url",
+      "target": "https://chatgpt.com"
+    },
+    "8": {
+      "name": "Antigravity",
+      "type": "app",
+      "target": "%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\Antigravity.lnk"
+    },
+    "9": {
+      "name": "OpenCode",
+      "type": "app",
+      "target": "%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\OpenCode.lnk"
+    },
+    "0": {
+      "name": "Toggle LCD / LEDs",
+      "type": "device",
+      "target": "toggle_led"
+    }
+  },
+  "joystick_bindings": {
+    "UP": {
+      "name": "Volume Up (Hold)",
+      "type": "media",
+      "target": "volumeup"
+    },
+    "DOWN": {
+      "name": "Volume Down (Hold)",
+      "type": "media",
+      "target": "volumedown"
+    },
+    "LEFT": {
+      "name": "Previous Tab",
+      "type": "hotkey",
+      "target": "ctrl+shift+tab"
+    },
+    "RIGHT": {
+      "name": "Next Tab",
+      "type": "hotkey",
+      "target": "ctrl+tab"
+    }
+  },
+  "joystick": {
+    "mouse_speed": 15,
+    "scroll_speed": 120,
+    "tab_repeat_ms": 280
+  }
+}
